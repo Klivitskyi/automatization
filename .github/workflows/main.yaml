@@ -54,4 +54,5 @@ jobs:
           server: s31.mydevil.net
           username: ${{ secrets.ftp_username }}
           password: ${{ secrets.ftp_password }}
-          local-dir: ./ivan-klivitskyi/
+          local-dir: ./cypress/
+          server-dir: /ivan-klivitskyi
