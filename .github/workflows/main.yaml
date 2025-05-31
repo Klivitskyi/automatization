@@ -55,4 +55,4 @@ jobs:
           username: ${{ secrets.ftp_username }}
           password: ${{ secrets.ftp_password }}
           local-dir: ./cypress/
-          server-dir: /ivan-klivitskyi
+          server-dir: /ivan-klivitskyi/
