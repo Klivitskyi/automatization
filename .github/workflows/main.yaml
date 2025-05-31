@@ -1,4 +1,5 @@
 name: CI/CD with Cypress
+
 on:
   push:
     branches:
@@ -6,35 +7,51 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
-    cypress-tests:
-      runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: cypress
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v2
+  cypress-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cypress
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-        - name: Set up Node.js
-          uses: actions/setup-node@v2
-          with:
-            node-version: '20'
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
 
-        - name: Install dependencies
-          run: npm install
+      - name: Install dependencies
+        run: npm install
 
-        - name: Start Express server
-          run: npm start &
-        
-        - name: Wait for server to be ready
-          run: npx wait-on http://localhost:3000
+      - name: Start Express server
+        run: npm start &
+      
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:3000
 
-        - name: Run Cypress tests
-          run: npx cypress run
+      - name: Run Cypress tests
+        run: npx cypress run
 
-        - name: Upload test results
-          uses: actions/upload-artifact@v4
-          with:
-            name: cypress-results
-            path: cypress/results
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-results
+          path: cypress/results
+
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v2
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.3.2
+        with:
+          server: s31.mydevil.net
+          username: ${{ secrets.ftp_username }}
+          password: ${{ secrets.ftp_password }}
+          local-dir: ./ivan-klivitskyi
