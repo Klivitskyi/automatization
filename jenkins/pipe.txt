@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "ivanklivitskyi/python-test:auto"
+        DOCKER_CREDENTIALS_ID = "dockerhub-creds"
+    }
+
+    stages {
+        stage('Install Docker CLI') {
+            steps {
+                sh '''
+                    apt-get update
+                    apt-get install -y docker.io
+                '''
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                deleteDir()
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[url: 'https://github.com/Klivitskyi/automatization']]
+                ])
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    cd ./jenkins
+                    docker build -t $DOCKER_IMAGE .
+                '''
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "$DOCKER_CREDENTIALS_ID", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh 'docker push $DOCKER_IMAGE'
+            }
+        }
+    }
+}
